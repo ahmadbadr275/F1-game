@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate F1 Championship 2026</title>
+<title>Ultimate F1 2026 Championship</title>
 <style>
 body { margin:0; background:#111; color:white; font-family:Arial, sans-serif; }
-header { text-align:center; margin-top:20px; }
+header { text-align:center; margin-top:10px; }
 #controls, #info, #scoreboard { display:flex; justify-content:center; flex-wrap:wrap; margin:10px; gap:10px; }
 #info div, #scoreboard div { background:#222; padding:10px 20px; border-radius:10px; box-shadow:0 0 10px #000; }
 button { padding:10px 15px; font-size:16px; border-radius:8px; cursor:pointer; }
@@ -16,7 +16,7 @@ button { padding:10px 15px; font-size:16px; border-radius:8px; cursor:pointer; }
 </head>
 <body>
 <header>
-<h1>Ultimate F1 Championship 2026 🏎️</h1>
+<h1>Ultimate F1 2026 Championship 🏎️</h1>
 <div id="controls">
 <input type="text" id="playerName" placeholder="Enter Player Name" style="padding:10px; font-size:16px; border-radius:5px; margin-right:10px;">
 <button id="startQualifyingBtn">Start Qualifying</button>
@@ -43,177 +43,79 @@ button { padding:10px 15px; font-size:16px; border-radius:8px; cursor:pointer; }
 </div>
 <div id="scoreboard"></div>
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas=document.getElementById('gameCanvas');
+const ctx=canvas.getContext('2d');
 
-// Tracks and basic arcade physics
-const tracks = [
-  t => ({ x:600 + 350*Math.cos(t) + 120*Math.sin(2*t), y:350 + 250*Math.sin(t) }),
-  t => ({ x:600 + 300*Math.cos(t) + 100*Math.sin(3*t), y:350 + 220*Math.sin(t) })
+let raceStarted=false, qualifyingDone=false, countdown=0, raceMode='Idle', currentTrackIndex=0;
+let lapTotal=50, totalRaces=6;
+let playerName='';
+
+// Tracks
+const tracks=[
+  t=>({x:600+350*Math.cos(t)+120*Math.sin(2*t), y:350+250*Math.sin(t)}),
+  t=>({x:600+300*Math.cos(t)+100*Math.sin(3*t), y:350+220*Math.sin(t)})
 ];
 
-let currentTrackIndex = 0;
-let totalRaces = tracks.length;
-let lapTotal = 50;
-let raceStarted = false;
-let qualifyingDone = false;
-let countdown = 0;
-let playerName = '';
-let raceMode = 'Idle';
+// Player car
+let car={t:0,speed:0,maxSpeed:1.2,accel:0.03,brake:0.06,turnSpeed:0.02,angle:0,tyre:100,points:0,crashed:false,dnf:false,player:true,x:0,y:0,name:'Player',lap:1};
 
-let car = { t:0, speed:0, maxSpeed:1.2, accel:0.03, brake:0.06, turnSpeed:0.02, angle:0, tyre:100, points:0, crashed:false, dnf:false, player:true, x:0, y:0, name:'Player', lap:1 };
-
-let teams = [
+// Teams
+let teams=[
   car,
-  { name:'Mercedes 2026', player:false, color:'#00D2BE', t:0, speed:0.014, laps:1, crashed:false, dnf:false, qualifyingTime:0, x:0, y:0, angle:0 },
-  { name:'Ferrari 2026', player:false, color:'#DC0000', t:0, speed:0.013, laps:1, crashed:false, dnf:false, qualifyingTime:0, x:0, y:0, angle:0 },
-  { name:'McLaren 2026', player:false, color:'#FF8700', t:0, speed:0.0135, laps:1, crashed:false, dnf:false, qualifyingTime:0, x:0, y:0, angle:0 }
+  {name:'Mercedes 2026',player:false,color:'#00D2BE',t:0,speed:0.014,laps:1,crashed:false,dnf:false,qualifyingTime:0,x:0,y:0,angle:0},
+  {name:'Ferrari 2026',player:false,color:'#DC0000',t:0,speed:0.013,laps:1,crashed:false,dnf:false,qualifyingTime:0,x:0,y:0,angle:0},
+  {name:'McLaren 2026',player:false,color:'#FF8700',t:0,speed:0.0135,laps:1,crashed:false,dnf:false,qualifyingTime:0,x:0,y:0,angle:0}
 ];
 
-let controls = { accel:false, brake:false, left:false, right:false };
+let controls={accel:false,brake:false,left:false,right:false};
 
-// Keyboard and button controls
-window.addEventListener('keydown', e => { if(e.key==='ArrowUp') controls.accel=true; if(e.key==='ArrowDown') controls.brake=true; if(e.key==='ArrowLeft') controls.left=true; if(e.key==='ArrowRight') controls.right=true; });
-window.addEventListener('keyup', e => { if(e.key==='ArrowUp') controls.accel=false; if(e.key==='ArrowDown') controls.brake=false; if(e.key==='ArrowLeft') controls.left=false; if(e.key==='ArrowRight') controls.right=false; });
+// Keyboard controls
+window.addEventListener('keydown',e=>{if(e.key==='ArrowUp')controls.accel=true;if(e.key==='ArrowDown')controls.brake=true;if(e.key==='ArrowLeft')controls.left=true;if(e.key==='ArrowRight')controls.right=true;});
+window.addEventListener('keyup',e=>{if(e.key==='ArrowUp')controls.accel=false;if(e.key==='ArrowDown')controls.brake=false;if(e.key==='ArrowLeft')controls.left=false;if(e.key==='ArrowRight')controls.right=false;});
 
-function holdButton(btn,key){ if(!btn) return; btn.addEventListener('mousedown', ()=> controls[key]=true); btn.addEventListener('mouseup', ()=> controls[key]=false); btn.addEventListener('mouseleave', ()=> controls[key]=false); btn.addEventListener('touchstart', e=>{ e.preventDefault(); controls[key]=true; }, {passive:false}); btn.addEventListener('touchend', ()=> controls[key]=false); btn.addEventListener('touchcancel', ()=> controls[key]=false); }
+// Touch buttons
+function holdButton(btn,key){if(!btn)return;btn.addEventListener('mousedown',()=>controls[key]=true);btn.addEventListener('mouseup',()=>controls[key]=false);btn.addEventListener('mouseleave',()=>controls[key]=false);btn.addEventListener('touchstart',e=>{e.preventDefault();controls[key]=true},{passive:false});btn.addEventListener('touchend',()=>controls[key]=false);btn.addEventListener('touchcancel',()=>controls[key]=false);}
 holdButton(document.getElementById('btnUp'),'accel');
 holdButton(document.getElementById('btnDown'),'brake');
 holdButton(document.getElementById('btnLeft'),'left');
 holdButton(document.getElementById('btnRight'),'right');
+document.getElementById('btnPit').addEventListener('click',()=>{car.speed=0;car.tyre=100;car.crashed=false;});
 
-const btnPit = document.getElementById('btnPit'); 
-if(btnPit){ 
-  btnPit.addEventListener('click', ()=> { car.speed=0; car.tyre=100; car.crashed=false; }); 
-}
+// Player name
+document.getElementById('playerName').addEventListener('change',e=>{playerName=e.target.value;document.getElementById('displayPlayerName').innerText=playerName;car.name=playerName||'Player';});
 
-const playerInput = document.getElementById('playerName'); 
-if(playerInput){ 
-  playerInput.addEventListener('change', e => { 
-    playerName = e.target.value; 
-    document.getElementById('displayPlayerName').innerText = playerName; 
-    car.name = playerName || 'Player'; 
-  }); 
-}
+// Place cars on track
+function placeCarsOnTrack(){const trackFunc=tracks[currentTrackIndex];teams.forEach((team,index)=>{let tPos=(index/teams.length)*2*Math.PI;let p=trackFunc(tPos);team.x=p.x;team.y=p.y;team.angle=0;team.t=tPos;team.lap=1;});}
 
-function placeCarsOnTrack(){ 
-  const trackFunc = tracks[currentTrackIndex]; 
-  teams.forEach((team,index)=>{ 
-    let tPos = (index / teams.length) * 2 * Math.PI; 
-    let p = trackFunc(tPos); 
-    team.x = p.x; 
-    team.y = p.y; 
-    team.angle = 0; 
-    team.t = tPos; 
-    team.lap=1; 
-  }); 
-}
-
-// Qualifying countdown
-document.getElementById('startQualifyingBtn').addEventListener('click', ()=>{
-  countdown=5; 
-  document.getElementById('startRaceBtn').disabled=true; 
-  raceMode='Qualifying';
-  const cdInterval=setInterval(()=>{
-    document.getElementById('countdown').innerText = countdown>0 ? countdown : 'GO!'; 
-    countdown--; 
-    if(countdown<0){ 
-      clearInterval(cdInterval); 
-      teams.forEach(team=>{ team.qualifyingTime=Math.random()*10 + 50; }); 
-      teams.sort((a,b)=>a.qualifyingTime-b.qualifyingTime); 
-      placeCarsOnTrack(); 
-      qualifyingDone=true; 
-      document.getElementById('startRaceBtn').disabled=false; 
-      raceMode='Idle'; 
-      document.getElementById('countdown').innerText=''; 
-    }
+// Countdown logic
+document.getElementById('startQualifyingBtn').addEventListener('click',()=>{
+  countdown=5;document.getElementById('startRaceBtn').disabled=true;raceMode='Qualifying';
+  let cdInterval=setInterval(()=>{
+    document.getElementById('countdown').innerText=countdown>0?countdown:'GO!';countdown--;
+    if(countdown<0){clearInterval(cdInterval);teams.forEach(team=>team.qualifyingTime=Math.random()*10+50);teams.sort((a,b)=>a.qualifyingTime-b.qualifyingTime);placeCarsOnTrack();qualifyingDone=true;document.getElementById('startRaceBtn').disabled=false;raceMode='Idle';document.getElementById('countdown').innerText='';}
   },1000);
 });
-
-// Race countdown
-document.getElementById('startRaceBtn').addEventListener('click', ()=>{
-  if(!qualifyingDone) return; 
-  countdown=5; 
-  raceMode='Race';
-  const cdInterval=setInterval(()=>{ 
-    document.getElementById('countdown').innerText = countdown>0 ? countdown : 'GO!'; 
-    countdown--; 
-    if(countdown<0){ 
-      clearInterval(cdInterval); 
-      document.getElementById('countdown').innerText=''; 
-      raceStarted=true; 
-    } 
-  },1000);
+document.getElementById('startRaceBtn').addEventListener('click',()=>{
+  if(!qualifyingDone)return;countdown=5;raceMode='Race';
+  let cdInterval=setInterval(()=>{document.getElementById('countdown').innerText=countdown>0?countdown:'GO!';countdown--;if(countdown<0){clearInterval(cdInterval);document.getElementById('countdown').innerText='';raceStarted=true;}},1000);
 });
 
-function drawTrack(){ 
-  const trackFunc = tracks[currentTrackIndex]; 
-  ctx.beginPath(); 
-  for(let t=0;t<Math.PI*2;t+=0.003){ 
-    let p=trackFunc(t); 
-    ctx.lineTo(p.x,p.y); 
-  } 
-  ctx.strokeStyle='#888'; 
-  ctx.lineWidth=60; 
-  ctx.stroke(); 
-}
+// Draw track
+function drawTrack(){const trackFunc=tracks[currentTrackIndex];ctx.beginPath();for(let t=0;t<Math.PI*2;t+=0.003){let p=trackFunc(t);ctx.lineTo(p.x,p.y);}ctx.strokeStyle='#888';ctx.lineWidth=60;ctx.stroke();}
+function drawCar(c){ctx.save();ctx.translate(c.x,c.y);ctx.rotate(c.angle);ctx.fillStyle=c.player?'red':c.color;ctx.fillRect(-22,-8,44,16);ctx.restore();}
 
-function drawCar(c){ 
-  ctx.save(); 
-  ctx.translate(c.x,c.y); 
-  ctx.rotate(c.angle); 
-  ctx.fillStyle=c.player?'red':c.color; 
-  ctx.fillRect(-22,-8,44,16); 
-  ctx.restore(); 
-}
+// Update player
+function updatePlayer(){if(!raceStarted||car.crashed||car.dnf)return;if(controls.accel)car.speed+=car.accel;if(car.speed>car.maxSpeed)car.speed=car.maxSpeed;if(controls.brake)car.speed-=car.brake;if(car.speed<0)car.speed=0;car.x+=Math.cos(car.angle)*car.speed;car.y+=Math.sin(car.angle)*car.speed;if(controls.left)car.angle-=car.turnSpeed;if(controls.right)car.angle+=car.turnSpeed;}
 
-function updatePlayer(){ 
-  if(!raceStarted || car.crashed || car.dnf) return; 
-  if(controls.accel) car.speed+=car.accel; 
-  if(car.speed>car.maxSpeed) car.speed=car.maxSpeed; 
-  if(controls.brake) car.speed-=car.brake; 
-  if(car.speed<0) car.speed=0; 
-  car.x += Math.cos(car.angle)*car.speed; 
-  car.y += Math.sin(car.angle)*car.speed; 
-  if(controls.left) car.angle-=car.turnSpeed; 
-  if(controls.right) car.angle+=car.turnSpeed; 
-}
+// Update AI cars
+function updateTeams(){if(!raceStarted)return;const trackFunc=tracks[currentTrackIndex];teams.forEach(team=>{if(!team.player&&!team.crashed&&!team.dnf){team.t+=team.speed*0.01;let p=trackFunc(team.t);team.x=p.x;team.y=p.y;if(team.t>Math.PI*2){team.t-=Math.PI*2;team.lap++;if(team.lap>lapTotal)team.dnf=true;}}});}
 
-function updateTeams(){ 
-  if(!raceStarted) return; 
-  const trackFunc=tracks[currentTrackIndex]; 
-  teams.forEach(team=>{ 
-    if(!team.player && !team.crashed && !team.dnf){ 
-      team.t+=team.speed*0.01; 
-      let p=trackFunc(team.t); 
-      team.x=p.x; 
-      team.y=p.y; 
-      if(team.t>Math.PI*2){ 
-        team.t-=Math.PI*2; 
-        team.lap++; 
-        if(team.lap>lapTotal) team.dnf=true; 
-      } 
-    } 
-  }); 
-}
+// Update UI
+function updateUI(){document.getElementById('lap').innerText=car.lap;document.getElementById('speed').innerText=(car.speed*100).toFixed(0);}
 
-function updateUI(){ 
-  document.getElementById('lap').innerText=car.lap; 
-  document.getElementById('speed').innerText=(car.speed*100).toFixed(0); 
-}
-
-function gameLoop(){ 
-  ctx.clearRect(0,0,1200,700); 
-  drawTrack(); 
-  updateTeams(); 
-  updatePlayer(); 
-  teams.forEach(drawCar); 
-  updateUI(); 
-  requestAnimationFrame(gameLoop); 
-}
-
-placeCarsOnTrack(); 
-gameLoop();
+// Main loop
+function gameLoop(){ctx.clearRect(0,0,1200,700);drawTrack();updateTeams();updatePlayer();teams.forEach(drawCar);updateUI();requestAnimationFrame(gameLoop);}
+placeCarsOnTrack();gameLoop();
 </script>
 </body>
 </html>
