@@ -174,7 +174,22 @@
 
   // ---------- Canvas ----------
   const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("<div id="errBox" style="position:fixed;left:10px;right:10px;top:60px;z-index:9999;
+background:#2b0b0b;color:#ffd0d0;border:1px solid #ff6b6b;padding:10px;border-radius:10px;
+font:12px/1.4 system-ui;white-space:pre-wrap;display:none"></div>
+
+<script>
+window.addEventListener("error", (e) => {
+  const box = document.getElementById("errBox");
+  box.style.display = "block";
+  box.textContent = "JS ERROR:\n" + (e.message || e.error) + "\n\n" + (e.filename||"") + ":" + (e.lineno||"") + ":" + (e.colno||"");
+});
+window.addEventListener("unhandledrejection", (e) => {
+  const box = document.getElementById("errBox");
+  box.style.display = "block";
+  box.textContent = "PROMISE ERROR:\n" + (e.reason?.message || e.reason);
+});
+</script>
 
   // ---------- Data ----------
   const Drivers = [
