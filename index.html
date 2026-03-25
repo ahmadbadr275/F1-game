@@ -2,83 +2,115 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>F1 Lite — HTML/JS/CSS</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+  <title>F1 Lite (Buttons) — HTML/JS/CSS</title>
   <style>
     :root{
       --bg:#07090f; --panel:#0e1424; --ink:#eaf0ff; --muted:#9fb0d0;
-      --red:#ff2d2d; --yellow:#ffd23c; --green:#35ff7a; --blue:#5aa2ff;
+      --accent:#5aa2ff; --red:#ff2d2d; --green:#35ff7a;
     }
     *{box-sizing:border-box;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
     body{margin:0;background:radial-gradient(1000px 600px at 50% -10%,#16234a 0%,var(--bg) 55%, #05060a 100%);color:var(--ink)}
     header{
       display:flex;gap:12px;align-items:center;justify-content:space-between;
-      padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08);
-      background:rgba(0,0,0,.25);backdrop-filter:blur(8px);position:sticky;top:0;z-index:2
+      padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.08);
+      background:rgba(0,0,0,.25);backdrop-filter:blur(8px);position:sticky;top:0;z-index:4
     }
     .title{display:flex;flex-direction:column;line-height:1.05}
-    .title b{font-size:14px;letter-spacing:.5px}
+    .title b{font-size:14px;letter-spacing:.4px}
     .title span{font-size:12px;color:var(--muted)}
     .wrap{display:grid;grid-template-columns:1fr 320px;gap:12px;padding:12px;max-width:1200px;margin:0 auto}
     @media (max-width: 980px){ .wrap{grid-template-columns:1fr} }
     canvas{
-      width:100%; aspect-ratio: 16/9; background:linear-gradient(#0a0f1e,#05060a);
+      width:100%; aspect-ratio: 16/9;
+      background:linear-gradient(#0a0f1e,#05060a);
       border:1px solid rgba(255,255,255,.10); border-radius:14px;
       box-shadow: 0 20px 60px rgba(0,0,0,.45);
       touch-action:none;
+      display:block;
     }
+
     .panel{
       background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
       border:1px solid rgba(255,255,255,.10); border-radius:14px; padding:12px;
       box-shadow: 0 20px 60px rgba(0,0,0,.25);
     }
-    .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:7px 0}
     .k{color:var(--muted);font-size:12px}
     .v{font-variant-numeric:tabular-nums; font-size:13px}
     .pill{padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);font-size:12px}
-    .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    button{
-      appearance:none;border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06);
-      color:var(--ink); border-radius:10px; padding:10px 10px; cursor:pointer;
-      font-weight:600; font-size:12px; letter-spacing:.2px;
-    }
-    button:hover{background:rgba(255,255,255,.10)}
-    button.primary{background:rgba(90,162,255,.22);border-color:rgba(90,162,255,.45)}
-    button.danger{background:rgba(255,45,45,.18);border-color:rgba(255,45,45,.35)}
-    .note{color:var(--muted);font-size:12px;line-height:1.35;margin-top:10px}
-    .grid{
-      display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px
-    }
+
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
     .card{
       padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.10);
       background:rgba(0,0,0,.18)
     }
     .card b{font-size:12px}
     .card div{font-size:12px;color:var(--muted);margin-top:4px}
-    .flags{display:flex;gap:8px;align-items:center;margin-top:10px}
-    .flag{width:10px;height:10px;border-radius:99px;border:1px solid rgba(255,255,255,.18)}
-    .flag.green{background:rgba(53,255,122,.9)}
-    .flag.yellow{background:rgba(255,210,60,.9)}
-    .flag.red{background:rgba(255,45,45,.9)}
-    .flag.off{background:rgba(255,255,255,.08)}
+
+    .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    button{
+      appearance:none;border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.06);
+      color:var(--ink); border-radius:10px; padding:10px 10px; cursor:pointer;
+      font-weight:700; font-size:12px; letter-spacing:.2px;
+    }
+    button:hover{background:rgba(255,255,255,.10)}
+    button.primary{background:rgba(90,162,255,.22);border-color:rgba(90,162,255,.45)}
+    button.danger{background:rgba(255,45,45,.18);border-color:rgba(255,45,45,.35)}
+    .note{color:var(--muted);font-size:12px;line-height:1.35;margin-top:10px}
+
+    /* On-screen controls */
+    .controls{
+      position:fixed; left:0; right:0; bottom:0;
+      padding:12px;
+      display:flex; justify-content:space-between; gap:12px;
+      z-index:5;
+      pointer-events:none; /* only buttons receive events */
+    }
+    .pad{
+      pointer-events:auto;
+      display:grid; gap:10px;
+      background:rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:10px;
+      backdrop-filter:blur(8px);
+    }
+    .pad.left{grid-template-columns:64px 64px; align-content:end}
+    .pad.right{grid-template-columns:76px 76px; align-content:end}
+    .ctrl{
+      width:64px;height:64px;border-radius:16px;
+      border:1px solid rgba(255,255,255,.14);
+      background:rgba(255,255,255,.08);
+      color:var(--ink);
+      font-weight:900;
+      display:flex;align-items:center;justify-content:center;
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-touch-callout:none;
+    }
+    .ctrl.big{width:76px;height:64px}
+    .ctrl:active, .ctrl.on{background:rgba(90,162,255,.22);border-color:rgba(90,162,255,.45)}
+    .ctrl.red:active, .ctrl.red.on{background:rgba(255,45,45,.20);border-color:rgba(255,45,45,.40)}
+    .ctrl.green:active, .ctrl.green.on{background:rgba(53,255,122,.18);border-color:rgba(53,255,122,.38)}
     .small{font-size:11px;color:var(--muted)}
   </style>
 </head>
 <body>
 <header>
   <div class="title">
-    <b>F1 Lite (HTML/JS/CSS)</b>
-    <span>Top‑down “sim‑feel”: grip, downforce, DRS, pit limiter, sprint/GP, championship</span>
+    <b>F1 Lite — Button Controls</b>
+    <span>HTML + CSS + JavaScript (single file). Fictional teams.</span>
   </div>
-  <div class="pill" id="sessionPill">Session: —</div>
+  <div class="pill" id="sessionPill">Session: FREE</div>
 </header>
 
 <div class="wrap">
   <canvas id="game" width="1280" height="720"></canvas>
 
   <aside class="panel">
-    <div class="row"><div class="k">Driver</div><div class="v" id="driverName">—</div></div>
-    <div class="row"><div class="k">Team</div><div class="v" id="teamName">—</div></div>
+    <div class="row"><div class="k">Driver</div><div class="v" id="driverName">You</div></div>
+    <div class="row"><div class="k">Team</div><div class="v" id="teamName">Aurora GP</div></div>
 
     <div class="grid">
       <div class="card"><b>Speed</b><div><span id="spd">0</span> km/h</div></div>
@@ -95,38 +127,78 @@
     <div class="row"><div class="k">Wear</div><div class="v"><span id="wear">0</span>%</div></div>
     <div class="row"><div class="k">Fuel</div><div class="v"><span id="fuel">100</span>%</div></div>
 
-    <div class="flags">
-      <div class="flag green" id="flagGreen"></div><div class="small">Green</div>
-      <div class="flag off" id="flagYellow"></div><div class="small">Yellow</div>
-      <div class="flag off" id="flagRed"></div><div class="small">Red</div>
-    </div>
-
     <div class="btns">
-      <button class="primary" id="btnSprint">Start Sprint (10 laps)</button>
-      <button class="primary" id="btnGP">Start GP (20 laps)</button>
-      <button id="btnNext">Next Weekend</button>
-      <button id="btnPit">Pit this lap</button>
-      <button id="btnDRS">Toggle DRS (D)</button>
-      <button id="btnReset" class="danger">Reset</button>
+      <button class="primary" id="btnSprint">Start Sprint (10)</button>
+      <button class="primary" id="btnGP">Start GP (20)</button>
+      <button id="btnPit">Pit request</button>
+      <button id="btnDRS">DRS toggle</button>
+      <button id="btnLim">Limiter toggle</button>
+      <button class="danger" id="btnReset">Reset</button>
     </div>
 
     <div class="note">
-      Controls: <b>W</b> throttle, <b>S</b> brake, <b>A/D</b> steer, <b>Space</b> handbrake,
-      <b>D</b> DRS toggle, <b>L</b> pit limiter, <b>P</b> request pit. <br/>
-      Mobile: drag left/right to steer, right side hold to throttle, left side hold to brake.
+      You can use <b>buttons</b> (mobile) or keyboard: <b>W/S</b> throttle/brake, <b>A/D</b> steer,
+      <b>Space</b> handbrake, <b>D</b> DRS, <b>L</b> limiter, <b>P</b> pit.
     </div>
 
-    <hr style="border:0;border-top:1px solid rgba(255,255,255,.10);margin:12px 0">
-
-    <div class="row"><div class="k">Championship</div><div class="v"><span id="round">1</span>/<span id="rounds">—</span></div></div>
-    <div class="row"><div class="k">Standings (top 5)</div><div class="v"></div></div>
-    <div class="note" id="standings"></div>
+    <div class="small" style="margin-top:10px">
+      Tip: For iPhone, host it (GitHub Pages) so it runs smoothly.
+    </div>
   </aside>
+</div>
+
+<!-- On-screen controls -->
+<div class="controls">
+  <div class="pad left">
+    <div class="ctrl" id="btnLeft">◀</div>
+    <div class="ctrl" id="btnRight">▶</div>
+    <div class="ctrl red" id="btnBrake">BRAKE</div>
+    <div class="ctrl" id="btnHand">HB</div>
+  </div>
+
+  <div class="pad right">
+    <div class="ctrl big green" id="btnThrottle">THROTTLE</div>
+    <div class="ctrl big" id="btnDRS2">DRS</div>
+    <div class="ctrl big" id="btnLim2">LIMIT</div>
+    <div class="ctrl big" id="btnPit2">PIT</div>
+  </div>
 </div>
 
 <script>
 (() => {
-  // ====== Data (fictional to avoid licensing) ======
+  // ----- Helpers -----
+  const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+  const wrapAngle = (a)=>{ while(a>Math.PI) a-=Math.PI*2; while(a<-Math.PI) a+=Math.PI*2; return a; };
+  const fmtTime = (ms)=>{
+    if(ms==null) return "—";
+    const s = ms/1000;
+    const m = Math.floor(s/60);
+    const r = (s - m*60);
+    return `${m}:${r.toFixed(3).padStart(6,'0')}`;
+  };
+
+  // ----- UI elements -----
+  const UI = {
+    sessionPill: document.getElementById("sessionPill"),
+    spd: document.getElementById("spd"),
+    gear: document.getElementById("gear"),
+    lap: document.getElementById("lap"),
+    lapsTotal: document.getElementById("lapsTotal"),
+    best: document.getElementById("best"),
+    last: document.getElementById("last"),
+    cur: document.getElementById("cur"),
+    drs: document.getElementById("drsUI"),
+    lim: document.getElementById("limUI"),
+    tyre: document.getElementById("tyreUI"),
+    wear: document.getElementById("wear"),
+    fuel: document.getElementById("fuel")
+  };
+
+  // ----- Canvas -----
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+
+  // ----- Fictional data -----
   const Teams = [
     { id:"AUR", name:"Aurora GP",  color:"#5aa2ff" },
     { id:"VLT", name:"Velocità",   color:"#ff2d2d" },
@@ -139,7 +211,6 @@
     { id:"CRN", name:"Crown",      color:"#b8ff5a" },
     { id:"PRX", name:"Proxima",    color:"#b0b7c8" }
   ];
-
   const Drivers = [
     { id:"YOU", name:"You", team:"AUR" },
     { id:"D01", name:"R. Vale", team:"VLT" },
@@ -153,385 +224,295 @@
     { id:"D09", name:"C. Rey", team:"PRX" }
   ];
 
-  const Calendar = [
-    { name:"Harbor City", lapsGP:20, lapsSprint:10 },
-    { name:"Desert Loop", lapsGP:20, lapsSprint:10 },
-    { name:"Forest Park", lapsGP:20, lapsSprint:10 },
-    { name:"Coastal Ring", lapsGP:20, lapsSprint:10 }
-  ];
-
-  const PointsGP = [25,18,15,12,10,8,6,4,2,1];
-  const PointsSprint = [8,7,6,5,4,3,2,1];
-
-  // ====== Canvas / scale ======
-  const canvas = document.getElementById("game");
-  const ctx = canvas.getContext("2d");
-
-  // ====== Track: simple closed loop with pit lane ======
-  // Centerline points (world units)
-  const track = makeTrack();
-  const pit = makePitLane(track);
-
+  // ----- Track generation -----
   function makeTrack(){
-    // A rounded-rectangle-ish spline sampled into points
     const pts = [];
-    const R = 320, r = 180;
-    const cx = 0, cy = 0;
-    const n = 420;
+    const R = 320, r = 185;
+    const n = 520;
     for(let i=0;i<n;i++){
       const t = i/n * Math.PI*2;
-      // Lissajous-ish to feel like a circuit
-      const x = cx + (R + 70*Math.sin(3*t)) * Math.cos(t);
-      const y = cy + (r + 50*Math.sin(2*t+0.7)) * Math.sin(t);
+      const x = (R + 65*Math.sin(3*t)) * Math.cos(t);
+      const y = (r + 45*Math.sin(2*t+0.7)) * Math.sin(t);
       pts.push({x,y});
     }
     return {
-      name: Calendar[0].name,
+      name: "Harbor City",
       pts,
       width: 54,
-      kerb: 6,
-      startIndex: 10,
-      drsZone: { a: 60, b: 120 }, // indices range along pts
-      pitEntryIndex: 320,
-      pitExitIndex: 30
+      startIndex: 12,
+      drsZone: { a: 70, b: 150 },
+      pitEntryIndex: 380,
+      pitExitIndex: 40
     };
   }
+  const track = makeTrack();
 
-  function makePitLane(track){
-    // Create a parallel lane segment near entry/exit
-    const {pts, pitEntryIndex, pitExitIndex} = track;
+  function normalAt(i){
+    const pts = track.pts, n = pts.length;
+    const p0 = pts[(i-1+n)%n], p1 = pts[(i+1)%n];
+    const tx = p1.x-p0.x, ty=p1.y-p0.y;
+    const len = Math.hypot(tx,ty)||1;
+    return {x:-ty/len, y:tx/len};
+  }
+
+  function makePitLane(){
     const lane = [];
     const offset = 70;
-    const pathIndices = [];
-    // from entry -> wrap -> exit
-    let i = pitEntryIndex;
+    const n = track.pts.length;
+    let i = track.pitEntryIndex;
     while(true){
-      pathIndices.push(i);
-      if(i === pitExitIndex) break;
-      i = (i+1) % pts.length;
+      const p = track.pts[i];
+      const nn = normalAt(i);
+      lane.push({ x: p.x + nn.x*offset, y: p.y + nn.y*offset, idx:i });
+      if(i === track.pitExitIndex) break;
+      i = (i+1) % n;
     }
-    for(const idx of pathIndices){
-      const p = pts[idx];
-      const n = normalAt(track, idx);
-      lane.push({ x: p.x + n.x*offset, y: p.y + n.y*offset, idx });
+    return { pts: lane, width: 26, speedLimit: 80/3.6, boxIndex: Math.floor(lane.length*0.58) };
+  }
+  const pit = makePitLane();
+
+  // ----- Geometry helpers -----
+  function nearestTrackIndex(x,y){
+    // fast-ish search: start from previous is best, but keep simple for now
+    let bestI=0, bestD=1e9;
+    const pts=track.pts;
+    for(let i=0;i<pts.length;i+=2){ // sample every 2 points for speed
+      const dx=pts[i].x-x, dy=pts[i].y-y;
+      const d=dx*dx+dy*dy;
+      if(d<bestD){ bestD=d; bestI=i; }
     }
-    return {
-      pts: lane,
-      width: 26,
-      speedLimit: 80/3.6, // m/s equivalent in our units
-      boxIndex: Math.floor(lane.length*0.55) // where to stop
-    };
+    return bestI;
   }
-
-  function normalAt(track, i){
-    const pts = track.pts;
-    const p0 = pts[(i-1+pts.length)%pts.length];
-    const p1 = pts[(i+1)%pts.length];
-    const tx = p1.x - p0.x, ty = p1.y - p0.y;
-    const len = Math.hypot(tx,ty) || 1;
-    // left normal
-    return { x: -ty/len, y: tx/len };
+  function distToCenterline(x,y){
+    const i = nearestTrackIndex(x,y);
+    const p = track.pts[i];
+    return Math.hypot(x-p.x, y-p.y);
   }
-
-  // ====== Car / physics ======
-  const player = {
-    x: track.pts[track.startIndex].x,
-    y: track.pts[track.startIndex].y,
-    vx: 0, vy: 0,
-    heading: headingAtIndex(track, track.startIndex),
-    yawRate: 0,
-    throttle: 0, brake: 0, steer: 0, handbrake: 0,
-    gear: 1,
-    drs: false,
-    limiter: false,
-    onPitRequest: false,
-    inPit: false,
-    pitting: false,
-    pitStopTimer: 0,
-    tyre: "MED", // SOFT/MED/HARD
-    wear: 0,
-    fuel: 1.0
-  };
-
-  function headingAtIndex(track, idx){
-    const pts = track.pts;
-    const p = pts[idx];
-    const q = pts[(idx+1)%pts.length];
+  function headingAtIndex(idx){
+    const pts=track.pts, n=pts.length;
+    const p=pts[idx], q=pts[(idx+1)%n];
     return Math.atan2(q.y-p.y, q.x-p.x);
   }
+  function inDRSZone(idx){
+    const {a,b} = track.drsZone;
+    if(a<=b) return idx>=a && idx<=b;
+    return idx>=a || idx<=b;
+  }
+  function nearestPolylineDistance(poly, x, y){
+    let best=1e9, bestIdx=0;
+    for(let i=0;i<poly.length;i++){
+      const dx=poly[i].x-x, dy=poly[i].y-y;
+      const d=Math.hypot(dx,dy);
+      if(d<best){best=d; bestIdx=i;}
+    }
+    return {dist:best, idx:bestIdx};
+  }
 
-  // Tunables (units are "game units")
+  // ----- Lap line -----
+  function startLine(){
+    const a = track.pts[track.startIndex];
+    const b = track.pts[(track.startIndex+1)%track.pts.length];
+    return {a,b};
+  }
+  function side(a,b,p){ return (b.x-a.x)*(p.y-a.y)-(b.y-a.y)*(p.x-a.x); }
+  function distPointToSegment(p,a,b){
+    const abx=b.x-a.x, aby=b.y-a.y;
+    const apx=p.x-a.x, apy=p.y-a.y;
+    const t = clamp((apx*abx+apy*aby)/(abx*abx+aby*aby),0,1);
+    const x=a.x+t*abx, y=a.y+t*aby;
+    return Math.hypot(p.x-x,p.y-y);
+  }
+  function crossedLine(prev, cur, line){
+    const s1 = side(line.a,line.b,prev);
+    const s2 = side(line.a,line.b,cur);
+    if(s1===0||s2===0||(s1<0&&s2>0)||(s1>0&&s2<0)){
+      return distPointToSegment(cur, line.a,line.b) < track.width*0.6;
+    }
+    return false;
+  }
+
+  // ----- Car physics (top-down sim-feel) -----
   const CAR = {
-    m: 820,                 // mass
-    L: 3.6,                 // wheelbase
-    engine: 15500,          // max engine force
-    brake: 24000,           // max brake force
-    mu: 1.70,               // base friction coefficient
-    muWet: 1.30,
-    Cd: 0.55,               // drag coefficient scale
-    Cl: 10.0,               // downforce scale
-    rr: 24,                 // rolling resistance
-    steerMax: 0.50,         // rad (at low speed)
-    steerSpeedCut: 45,      // m/s where steering reduces
-    drsDragMult: 0.82,      // less drag with DRS
-    drsDownMult: 0.92,      // slightly less downforce with DRS
-    limiterV: 80/3.6,       // pit limiter
-    fuelBurn: 0.000035,     // per N*s-ish (simple)
-    wearRate: 0.000006      // per (lat slip * speed)
+    m: 820,
+    L: 3.6,
+    engine: 15500,
+    brake: 24000,
+    Cd: 0.55,
+    Cl: 10.0,
+    rr: 24,
+    steerMax: 0.50,
+    steerSpeedCut: 45,
+    drsDragMult: 0.82,
+    drsDownMult: 0.92,
+    limiterV: 80/3.6,
+    wearRate: 0.000006,
+    fuelBurn: 0.00003
   };
-
   const TyreParams = {
     SOFT: { mu: 1.82, wear: 1.45 },
     MED:  { mu: 1.70, wear: 1.00 },
     HARD: { mu: 1.58, wear: 0.75 }
   };
 
-  const AI_COUNT = 9;
   const cars = [];
-  initCars();
-
-  function initCars(){
-    cars.length = 0;
+  function resetGrid(){
+    cars.length=0;
     for(let i=0;i<Drivers.length;i++){
-      const d = Drivers[i];
-      const team = Teams.find(t=>t.id===d.team);
+      const d=Drivers[i];
+      const t=Teams.find(tt=>tt.id===d.team);
       const idx = (track.startIndex - i*8 + track.pts.length) % track.pts.length;
-      const p = track.pts[idx];
+      const p=track.pts[idx];
       cars.push({
-        id:d.id, name:d.name, team: team.name, teamId: team.id, color: team.color,
-        x:p.x, y:p.y,
-        vx:0, vy:0,
-        heading: headingAtIndex(track, idx),
-        throttle:0, brake:0, steer:0,
-        gear:1,
-        drs:false, limiter:false,
+        id:d.id, name:d.name, team:t.name, color:t.color,
+        x:p.x, y:p.y, vx:0, vy:0, heading: headingAtIndex(idx), yawRate:0,
+        throttle:0, brake:0, steer:0, handbrake:0,
+        gear:1, drs:false, limiter:false,
         inPit:false, pitting:false, pitStopTimer:0, pitPlan:false,
-        tyre: "MED", wear: 0, fuel: 1.0,
-        ai: d.id !== "YOU",
-        targetIndex: idx,
-        lap:1, passedStart:false,
-        lastLap: null, bestLap: null, lapStartTime: performance.now(),
-        points: 0
+        tyre:"MED", wear:0, fuel:1.0,
+        ai: d.id!=="YOU",
+        lap:1, passedStart:false, lapStartTime:performance.now(), lastLap:null, bestLap:null
       });
     }
   }
+  resetGrid();
 
-  // ====== Race/session management ======
-  const Session = {
-    type: "NONE", // SPRINT/GP
-    running: false,
-    lapsTotal: 0,
-    round: 1,
-    rounds: Calendar.length,
-    yellow: false,
-    red: false
-  };
-
-  function startSession(type){
-    Session.type = type;
-    Session.running = true;
-    Session.yellow = false;
-    Session.red = false;
-
-    const cal = Calendar[Session.round-1];
-    track.name = cal.name;
-    Session.lapsTotal = (type==="SPRINT") ? cal.lapsSprint : cal.lapsGP;
-    document.getElementById("lapsTotal").textContent = Session.lapsTotal;
-
-    // reset cars on grid
-    for(let i=0;i<cars.length;i++){
-      const c = cars[i];
-      const idx = (track.startIndex - i*8 + track.pts.length) % track.pts.length;
-      const p = track.pts[idx];
-      c.x=p.x; c.y=p.y; c.vx=0; c.vy=0;
-      c.heading = headingAtIndex(track, idx);
-      c.throttle=0; c.brake=0; c.steer=0;
-      c.drs=false; c.limiter=false;
-      c.inPit=false; c.pitting=false; c.pitStopTimer=0; c.pitPlan=false;
-      c.tyre="MED"; c.wear=0; c.fuel=1.0;
-      c.lap=1; c.passedStart=false;
-      c.lastLap=null; c.bestLap=null; c.lapStartTime=performance.now();
-    }
-    updateHeaderPill();
+  const Session = { type:"FREE", running:false, lapsTotal:0 };
+  function setSession(type, laps){
+    Session.type=type;
+    Session.running = type!=="FREE";
+    Session.lapsTotal = laps;
+    UI.lapsTotal.textContent = laps>0 ? laps : "—";
+    UI.sessionPill.textContent = `Session: ${type}`;
+    resetGrid();
   }
 
-  function finishSession(){
-    Session.running = false;
-    // order by progress (lap, track index proximity)
-    const ordered = [...cars].sort((a,b)=> raceProgress(b)-raceProgress(a));
-    const ptsTable = (Session.type==="SPRINT") ? PointsSprint : PointsGP;
-    for(let i=0;i<ordered.length;i++){
-      const pts = ptsTable[i] ?? 0;
-      ordered[i].points += pts;
-    }
-  }
-
-  function raceProgress(c){
-    const idx = nearestTrackIndex(track, c.x, c.y);
-    return (c.lap-1)*track.pts.length + idx;
-  }
-
-  function nextWeekend(){
-    if(Session.running) return;
-    Session.round = Math.min(Session.round+1, Session.rounds);
-    updateStandings();
-    updateHeaderPill();
-  }
-
-  // ====== Lap timing via start line segment ======
-  function startLine(){
-    const a = track.pts[track.startIndex];
-    const b = track.pts[(track.startIndex+1)%track.pts.length];
-    return {a,b};
-  }
-  function crossedLine(prevX,prevY,x,y, line){
-    // segment intersection with infinite line between a-b: use side test
-    const s1 = side(line.a, line.b, {x:prevX,y:prevY});
-    const s2 = side(line.a, line.b, {x,y});
-    // changed sign and close to segment bounds
-    if(s1===0 || s2===0 || (s1<0 && s2>0) || (s1>0 && s2<0)){
-      // also require near the line segment region
-      const d = distPointToSegment({x,y}, line.a, line.b);
-      return d < track.width*0.6;
-    }
-    return false;
-  }
-  function side(a,b,p){ return (b.x-a.x)*(p.y-a.y) - (b.y-a.y)*(p.x-a.x); }
-  function distPointToSegment(p,a,b){
-    const abx=b.x-a.x, aby=b.y-a.y;
-    const apx=p.x-a.x, apy=p.y-a.y;
-    const t = Math.max(0, Math.min(1, (apx*abx+apy*aby)/(abx*abx+aby*aby)));
-    const x=a.x+t*abx, y=a.y+t*aby;
-    return Math.hypot(p.x-x,p.y-y);
-  }
-
-  // ====== Input (keyboard + touch) ======
+  // ----- Keyboard support (optional) -----
   const keys = new Set();
-  window.addEventListener("keydown", (e)=>{
+  addEventListener("keydown",(e)=>{
     keys.add(e.key.toLowerCase());
     if(e.key.toLowerCase()==="d") toggleDRS();
     if(e.key.toLowerCase()==="l") toggleLimiter();
     if(e.key.toLowerCase()==="p") requestPit();
   });
-  window.addEventListener("keyup", (e)=> keys.delete(e.key.toLowerCase()));
+  addEventListener("keyup",(e)=>keys.delete(e.key.toLowerCase()));
 
-  // Touch: steer by drag; right side hold throttle, left side hold brake
-  let touchSteer = 0, steerAnchorX = null;
-  let touchThrottle = 0, touchBrake = 0;
-  canvas.addEventListener("pointerdown", (e)=>{
-    canvas.setPointerCapture(e.pointerId);
-    const x = e.offsetX, y = e.offsetY;
-    if(x > canvas.clientWidth*0.55){
-      touchThrottle = 1;
-    }else if(x < canvas.clientWidth*0.45){
-      touchBrake = 1;
-    }
-    steerAnchorX = x;
-  });
-  canvas.addEventListener("pointermove", (e)=>{
-    if(steerAnchorX==null) return;
-    const dx = (e.offsetX - steerAnchorX) / canvas.clientWidth;
-    touchSteer = Math.max(-1, Math.min(1, dx*3.0));
-  });
-  const endPointer = (e)=>{
-    touchThrottle = 0; touchBrake = 0; touchSteer = 0; steerAnchorX=null;
-    try{ canvas.releasePointerCapture(e.pointerId);}catch{}
-  };
-  canvas.addEventListener("pointerup", endPointer);
-  canvas.addEventListener("pointercancel", endPointer);
+  // ----- Button controls (requested) -----
+  const btnState = { left:0,right:0,throttle:0,brake:0,hand:0 };
 
-  // Buttons
-  document.getElementById("btnSprint").onclick = ()=> startSession("SPRINT");
-  document.getElementById("btnGP").onclick = ()=> startSession("GP");
-  document.getElementById("btnNext").onclick = ()=> nextWeekend();
+  function bindHold(el, key, onPressToggle=false){
+    const down = (e)=>{ e.preventDefault(); if(onPressToggle){ btnState[key]=btnState[key]?0:1; el.classList.toggle("on", !!btnState[key]); return; } btnState[key]=1; el.classList.add("on"); };
+    const up   = (e)=>{ e.preventDefault(); if(onPressToggle) return; btnState[key]=0; el.classList.remove("on"); };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    el.addEventListener("pointerleave", up);
+  }
+
+  bindHold(document.getElementById("btnLeft"), "left");
+  bindHold(document.getElementById("btnRight"), "right");
+  bindHold(document.getElementById("btnThrottle"), "throttle");
+  bindHold(document.getElementById("btnBrake"), "brake");
+  bindHold(document.getElementById("btnHand"), "hand");
+
+  document.getElementById("btnDRS2").addEventListener("pointerdown",(e)=>{e.preventDefault(); toggleDRS();});
+  document.getElementById("btnLim2").addEventListener("pointerdown",(e)=>{e.preventDefault(); toggleLimiter();});
+  document.getElementById("btnPit2").addEventListener("pointerdown",(e)=>{e.preventDefault(); requestPit();});
+
+  // UI buttons
+  document.getElementById("btnSprint").onclick = ()=> setSession("SPRINT", 10);
+  document.getElementById("btnGP").onclick = ()=> setSession("GP", 20);
   document.getElementById("btnPit").onclick = ()=> requestPit();
   document.getElementById("btnDRS").onclick = ()=> toggleDRS();
-  document.getElementById("btnReset").onclick = ()=> { Session.round=1; for(const c of cars) c.points=0; startSession(Session.type==="NONE"?"GP":Session.type); updateStandings(); };
+  document.getElementById("btnLim").onclick = ()=> toggleLimiter();
+  document.getElementById("btnReset").onclick = ()=> setSession(Session.type==="FREE"?"FREE":Session.type, Session.lapsTotal);
 
-  function toggleDRS(){
-    const you = cars.find(c=>c.id==="YOU");
-    you.drs = !you.drs;
-  }
-  function toggleLimiter(){
-    const you = cars.find(c=>c.id==="YOU");
-    you.limiter = !you.limiter;
-  }
-  function requestPit(){
-    const you = cars.find(c=>c.id==="YOU");
-    you.pitPlan = true;
+  function you(){ return cars.find(c=>c.id==="YOU"); }
+  function toggleDRS(){ you().drs = !you().drs; }
+  function toggleLimiter(){ you().limiter = !you().limiter; }
+  function requestPit(){ you().pitPlan = true; }
+
+  // ----- AI -----
+  function aiControl(c){
+    const idx = nearestTrackIndex(c.x,c.y);
+    const target = track.pts[(idx+12)%track.pts.length];
+    const angTo = Math.atan2(target.y-c.y, target.x-c.x);
+    let err = wrapAngle(angTo - c.heading);
+
+    // crude speed target via "curvature"
+    const h0 = headingAtIndex((idx-8+track.pts.length)%track.pts.length);
+    const h1 = headingAtIndex((idx+8)%track.pts.length);
+    const curv = Math.abs(wrapAngle(h1-h0));
+    let vTarget = clamp(80 - curv*220, 35, 85);
+
+    const speed = Math.hypot(c.vx,c.vy);
+    c.steer = clamp(err*1.7, -1, 1);
+    c.throttle = speed < vTarget ? 1 : 0.25;
+    c.brake = speed > vTarget+6 ? 0.55 : 0;
+
+    // pit logic
+    if(!c.pitPlan && (c.wear>0.55 || c.fuel<0.35)) c.pitPlan = Math.random()<0.65;
+    const distEntry = (track.pitEntryIndex - idx + track.pts.length) % track.pts.length;
+    if(c.pitPlan && distEntry < 30) err += 0.35;
+
+    c.drs = inDRSZone(idx) && curv < 0.09 && !c.inPit;
+    c.limiter = c.inPit;
   }
 
-  // ====== Simulation loop ======
-  let lastT = performance.now();
-  let acc = 0;
+  // ----- Physics step -----
+  let lastT = performance.now(), acc=0;
   const fixedDt = 1/120;
 
-  function tick(now){
-    const dt = Math.min(0.05, (now-lastT)/1000);
+  requestAnimationFrame(function loop(now){
+    const dt = Math.min(0.05,(now-lastT)/1000);
     lastT = now;
     acc += dt;
-
     while(acc >= fixedDt){
       step(fixedDt);
       acc -= fixedDt;
     }
     render();
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
+    requestAnimationFrame(loop);
+  });
 
   function step(dt){
-    if(!Session.running) {
-      // idle spin-up: allow player to drive anyway
-    }
+    const p = you();
 
-    // flags: simple yellow if crash-like (not implemented); keep green
-    setFlags(false,false);
+    // Combine keyboard + button inputs
+    const kThrottle = keys.has("w") ? 1 : 0;
+    const kBrake = keys.has("s") ? 1 : 0;
+    const kHand = keys.has(" ") ? 1 : 0;
+    let kSteer = 0;
+    if(keys.has("a")) kSteer -= 1;
+    if(keys.has("d")) kSteer += 1;
 
-    // Update inputs for player
-    const you = cars.find(c=>c.id==="YOU");
-    you.throttle = (keys.has("w") ? 1 : 0) || touchThrottle;
-    you.brake = (keys.has("s") ? 1 : 0) || touchBrake;
-    you.handbrake = keys.has(" ") ? 1 : 0;
-    let steer = 0;
-    if(keys.has("a")) steer -= 1;
-    if(keys.has("d")) steer += 1;
-    you.steer = (steer!==0) ? steer : touchSteer;
+    p.throttle = Math.max(kThrottle, btnState.throttle);
+    p.brake = Math.max(kBrake, btnState.brake);
+    p.handbrake = Math.max(kHand, btnState.hand);
+    p.steer = clamp(kSteer + (btnState.right - btnState.left), -1, 1);
 
-    // AI
+    // AI controls
+    for(const c of cars) if(c.ai) aiControl(c);
+
+    // physics for all
+    const line = startLine();
     for(const c of cars){
-      if(!c.ai) continue;
-      aiControl(c, dt);
-    }
-
-    // Physics
-    for(const c of cars){
-      const prevX=c.x, prevY=c.y;
+      const prev = {x:c.x,y:c.y};
       carPhysics(c, dt);
 
-      // lap timing
       if(Session.running){
-        const line = startLine();
-        if(crossedLine(prevX,prevY,c.x,c.y,line)){
+        if(crossedLine(prev, {x:c.x,y:c.y}, line)){
           if(c.passedStart){
-            // completed a lap
-            const lapTimeMs = performance.now() - c.lapStartTime;
-            c.lastLap = lapTimeMs;
-            c.bestLap = (c.bestLap==null) ? lapTimeMs : Math.min(c.bestLap, lapTimeMs);
+            const lapTime = performance.now() - c.lapStartTime;
+            c.lastLap = lapTime;
+            c.bestLap = c.bestLap==null ? lapTime : Math.min(c.bestLap, lapTime);
             c.lapStartTime = performance.now();
             c.lap++;
-            if(c.id==="YOU"){
-              // UI updated in render
-            }
-            if(c.lap > Session.lapsTotal){
-              // finished
-              // if player finished, end session when all finish OR immediate
-              // We'll end when YOU finishes.
-              if(c.id==="YOU"){
-                finishSession();
-                updateStandings();
-                updateHeaderPill();
-              }
+            if(c.id==="YOU" && c.lap > Session.lapsTotal){
+              // stop session when player finishes
+              Session.running = false;
+              Session.type = "FREE";
+              UI.sessionPill.textContent = "Session: FREE";
+              UI.lapsTotal.textContent = "—";
             }
           }else{
             c.passedStart = true;
@@ -541,192 +522,176 @@
       }
     }
 
-    // Basic collisions: soft repulsion
+    // soft collision
     for(let i=0;i<cars.length;i++){
       for(let j=i+1;j<cars.length;j++){
         const a=cars[i], b=cars[j];
-        const dx=b.x-a.x, dy=b.y-a.y;
-        const d=Math.hypot(dx,dy);
+        const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy);
         const minD=16;
         if(d>0 && d<minD){
-          const nx=dx/d, ny=dy/d;
-          const push=(minD-d)*0.5;
+          const nx=dx/d, ny=dy/d, push=(minD-d)*0.5;
           a.x -= nx*push; a.y -= ny*push;
           b.x += nx*push; b.y += ny*push;
-          // damp
-          a.vx *= 0.98; a.vy *= 0.98; b.vx *= 0.98; b.vy *= 0.98;
+          a.vx*=0.985; a.vy*=0.985; b.vx*=0.985; b.vy*=0.985;
         }
       }
     }
   }
 
-  function aiControl(c, dt){
-    // Follow centerline; decide pit once wear/fuel
-    const idx = nearestTrackIndex(track, c.x, c.y);
-    c.targetIndex = (idx + 10) % track.pts.length;
-    const target = track.pts[c.targetIndex];
-
-    const angTo = Math.atan2(target.y - c.y, target.x - c.x);
-    let err = wrapAngle(angTo - c.heading);
-
-    // speed target by curvature (lookahead)
-    const curv = curvatureApprox(track, idx);
-    let vTarget = 72 - curv*180; // m/s-ish
-    vTarget = Math.max(35, Math.min(85, vTarget));
-
-    // Pit logic
-    if(!c.pitPlan){
-      if(c.wear > 0.55 || c.fuel < 0.35) c.pitPlan = Math.random() < 0.7;
-    }
-
-    // If pitPlan, aim for pit entry and go in
-    const pitEntryDist = wrappedIndexDistance(idx, track.pitEntryIndex, track.pts.length);
-    if(c.pitPlan && pitEntryDist < 35) {
-      // start moving toward pit lane by steering "outward"
-      err += 0.35;
-    }
-
-    // Controls
-    c.steer = clamp(err * 1.8, -1, 1);
-    const speed = Math.hypot(c.vx,c.vy);
-    c.throttle = speed < vTarget ? 1 : 0.25;
-    c.brake = speed > vTarget+6 ? 0.6 : 0;
-
-    // DRS: enable on straight-ish and not in pit
-    const inDrs = inDRSZone(idx);
-    c.drs = inDrs && curv < 0.08 && !c.inPit;
-
-    // limiter
-    c.limiter = c.inPit;
-  }
-
-  function curvatureApprox(track, idx){
-    const pts=track.pts, n=pts.length;
-    const p0=pts[(idx-6+n)%n], p1=pts[idx], p2=pts[(idx+6)%n];
-    const a = Math.atan2(p1.y-p0.y, p1.x-p0.x);
-    const b = Math.atan2(p2.y-p1.y, p2.x-p1.x);
-    return Math.abs(wrapAngle(b-a));
-  }
-
-  function inDRSZone(idx){
-    const {a,b} = track.drsZone;
-    if(a<=b) return idx>=a && idx<=b;
-    return idx>=a || idx<=b;
-  }
-
-  function wrappedIndexDistance(from,to,n){
-    // distance going forward from 'from' to 'to'
-    return (to - from + n) % n;
-  }
-
   function carPhysics(c, dt){
-    // Determine if in pit lane (near pit polyline and between entry/exit range)
-    const pitInfo = nearestPolylinePoint(pit.pts, c.x, c.y);
-    const distToPit = pitInfo.dist;
-    const nearPitLane = distToPit < pit.width*0.65;
+    // pit lane detect
+    const pitNear = nearestPolylineDistance(pit.pts, c.x, c.y);
+    const nearPitLane = pitNear.dist < pit.width*0.65;
+    const idx = nearestTrackIndex(c.x,c.y);
+    const distEntry = (track.pitEntryIndex - idx + track.pts.length) % track.pts.length;
+    const distExit  = (track.pitExitIndex - idx + track.pts.length) % track.pts.length;
 
-    const idx = nearestTrackIndex(track, c.x, c.y);
-    const nearEntry = wrappedIndexDistance(idx, track.pitEntryIndex, track.pts.length) < 18;
-    const nearExit  = wrappedIndexDistance(idx, track.pitExitIndex, track.pts.length) < 18;
+    if(!c.inPit && c.pitPlan && distEntry < 20 && nearPitLane) c.inPit = true;
+    if(c.inPit && distExit < 18 && !nearPitLane) { c.inPit=false; c.pitPlan=false; c.limiter=false; }
 
-    if(!c.inPit && c.pitPlan && nearEntry && nearPitLane) c.inPit = true;
-    if(c.inPit && nearExit && !nearPitLane) { c.inPit=false; c.pitPlan=false; c.limiter=false; }
-
-    // pit stop at box
+    // pit stop box
     if(c.inPit){
-      const boxP = pit.pts[pit.boxIndex];
-      const dBox = Math.hypot(c.x-boxP.x, c.y-boxP.y);
+      const box = pit.pts[pit.boxIndex];
+      const dBox = Math.hypot(c.x-box.x, c.y-box.y);
       if(dBox < 18 && Math.hypot(c.vx,c.vy) < 4.0 && !c.pitting){
         c.pitting = true;
-        c.pitStopTimer = 2.6 + Math.random()*1.2; // seconds
-        // change tyres + refuel
+        c.pitStopTimer = 2.8 + Math.random()*1.2;
         c.tyre = (c.wear>0.65) ? "HARD" : "MED";
         c.wear = 0.02;
         c.fuel = Math.min(1.0, c.fuel + 0.55);
       }
     }
     if(c.pitting){
-      c.throttle = 0; c.brake = 1;
+      c.throttle=0; c.brake=1;
       c.pitStopTimer -= dt;
-      if(c.pitStopTimer <= 0){
-        c.pitting = false;
-      }
+      if(c.pitStopTimer <= 0) c.pitting=false;
     }
 
     const speed = Math.hypot(c.vx,c.vy);
 
-    // Steering reduced with speed
+    // steering vs speed
     const steerMax = CAR.steerMax * (1 / (1 + (speed/CAR.steerSpeedCut)**2));
     const steerAngle = c.steer * steerMax;
 
-    // Basis vectors
-    const fx = Math.cos(c.heading), fy = Math.sin(c.heading);
-    const lx = -fy, ly = fx;
+    // basis
+    const fx=Math.cos(c.heading), fy=Math.sin(c.heading);
+    const lx=-fy, ly=fx;
 
     // velocities in car frame
     const vLong = c.vx*fx + c.vy*fy;
-    const vLat  = c.vx*lx + c.vy*ly;
 
-    // Aero
-    const drsDragMult = c.drs ? CAR.drsDragMult : 1.0;
-    const drsDownMult = c.drs ? CAR.drsDownMult : 1.0;
-    const Fdrag = CAR.Cd * drsDragMult * speed*speed;
-    const Fdown = CAR.Cl * drsDownMult * speed*speed;
+    // aero
+    const drsDrag = c.drs ? CAR.drsDragMult : 1;
+    const drsDown = c.drs ? CAR.drsDownMult : 1;
+    const Fdrag = CAR.Cd * drsDrag * speed*speed;
+    const Fdown = CAR.Cl * drsDown * speed*speed;
 
-    // Tyres
+    // tyres / grip
     const tp = TyreParams[c.tyre] || TyreParams.MED;
-    const mu = tp.mu * (1 - 0.65*c.wear); // wear reduces grip
+    const mu = tp.mu * (1 - 0.65*c.wear);
     const N = CAR.m*9.81 + Fdown;
     const FlatMax = mu * N;
 
-    // Engine/brake
+    // long forces
     let Fengine = c.throttle * CAR.engine;
     let Fbrake = c.brake * CAR.brake;
     if(c.handbrake) Fbrake = Math.max(Fbrake, CAR.brake*0.85);
-
-    // Pit limiter (cap speed)
-    const vLimit = (c.limiter || c.inPit) ? CAR.limiterV : Infinity;
-
-    // Longitudinal force along forward
     let Flong = Fengine - Math.sign(vLong)*Fbrake - CAR.rr*vLong - Math.sign(vLong)*Fdrag;
 
-    // Lateral force request from steering (simple cornering stiffness model)
+    // yaw dynamics (simple)
     const desiredYaw = vLong * Math.tan(steerAngle) / Math.max(1e-3, CAR.L);
     const yawErr = desiredYaw - c.yawRate;
-    const yawAccel = yawErr * 7.5; // stabilizer
-    c.yawRate += yawAccel * dt;
+    c.yawRate += yawErr * 7.5 * dt;
 
-    // Lateral accel demand from yaw rate
+    // lateral force from yaw
     let Flat = -vLong * c.yawRate * CAR.m;
-    // Clamp to tyre grip
     Flat = clamp(Flat, -FlatMax, FlatMax);
 
-    // Combine forces in world
-    let ax = (Flong*fx + Flat*lx) / CAR.m;
-    let ay = (Flong*fy + Flat*ly) / CAR.m;
+    // world accel
+    let ax = (Flong*fx + Flat*lx)/CAR.m;
+    let ay = (Flong*fy + Flat*ly)/CAR.m;
 
-    // Integrate
     c.vx += ax*dt;
     c.vy += ay*dt;
 
-    // Speed limiter clamp
+    // pit limiter
+    const vLimit = (c.limiter || c.inPit) ? CAR.limiterV : Infinity;
     const sp = Math.hypot(c.vx,c.vy);
-    if(sp > vLimit){
-      const k = vLimit / sp;
-      c.vx *= k; c.vy *= k;
+    if(sp>vLimit){
+      const k=vLimit/sp;
+      c.vx*=k; c.vy*=k;
     }
 
-    // Heading update
     c.heading = wrapAngle(c.heading + c.yawRate*dt);
+    c.x += c.vx*dt; c.y += c.vy*dt;
 
-    // Position update
-    c.x += c.vx*dt;
-    c.y += c.vy*dt;
-
-    // Track limits + offroad penalty
-    const dToCenter = distToCenterline(track, c.x, c.y);
-    if(dToCenter > track.width*0.55){
-      // off track: lose grip + slow
-      c.vx *= 0.992;
-      c.vy *= 0.992;
+    // off-track penalty
+    const dCenter = distToCenterline(c.x,c.y);
+    if(dCenter > track.width*0.55){
+      c.vx*=0.992; c.vy*=0.992;
       c.wear = Math.min(0.99, c.wear + 0.002);
+    }
+
+    // wear + fuel (simple)
+    c.wear = Math.min(0.99, c.wear + (Math.abs(Flat)/(FlatMax+1e-6)) * (sp*dt) * CAR.wearRate * tp.wear);
+    c.fuel = Math.max(0, c.fuel - (Math.abs(Flong)*dt) * CAR.fuelBurn);
+
+    // fake gearbox display
+    const kph = sp*3.6;
+    c.gear = clamp(1 + Math.floor(kph/45), 1, 8);
+  }
+
+  // ----- Rendering -----
+  function render(){
+    const w=canvas.width, h=canvas.height;
+    ctx.clearRect(0,0,w,h);
+
+    // camera follows player
+    const p = you();
+    const cam = { x:p.x, y:p.y, zoom: 1.10 };
+
+    // background
+    ctx.fillStyle = "#05060a";
+    ctx.fillRect(0,0,w,h);
+
+    // transform world->screen
+    const scale = 1.35 * cam.zoom;
+    const toScreen = (x,y)=>({
+      x: w/2 + (x-cam.x)*scale,
+      y: h/2 + (y-cam.y)*scale
+    });
+
+    // draw track ribbon
+    drawTrackRibbon(track.pts, track.width, "#101a33", "#0a1022");
+    // kerbs
+    drawTrackRibbon(track.pts, track.width+10, "rgba(255,255,255,0.06)", null, true);
+    // pit lane
+    drawTrackRibbon(pit.pts, pit.width, "#0c132a", null);
+
+    // start line
+    const line = startLine();
+    const a = toScreen(line.a.x, line.a.y), b=toScreen(line.b.x, line.b.y);
+    ctx.strokeStyle="rgba(255,255,255,0.75)";
+    ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+
+    // DRS zone highlight (approx: draw small dots)
+    ctx.fillStyle="rgba(90,162,255,0.35)";
+    for(let i=track.drsZone.a;i<=track.drsZone.b;i+=6){
+      const pp=track.pts[i%track.pts.length];
+      const s=toScreen(pp.x,pp.y);
+      ctx.beginPath(); ctx.arc(s.x,s.y,3,0,Math.PI*2); ctx.fill();
+    }
+
+    // cars
+    const ordered=[...cars].sort((a,b)=> (a.id==="YOU"?1:0) - (b.id==="YOU"?1:0)); // draw AI first
+    for(const c of ordered){
+      drawCar(c, toScreen, scale);
+    }
+
+    // HUD in-canvas
+    ctx.fillStyle="rgba(0,0,0,0.35)";
+    ctx.fillRect(12,12,250,64);
+    ctx.fillStyle="#eaf0ff";
+    ctx.font="600 14px system-ui";
+    ctx.fillText(`${track.name}`, 20, 34
